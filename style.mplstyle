@@ -1,0 +1,20 @@
+# Font Sizes
+font.family      : serif
+axes.titlesize   : 28
+axes.labelsize   : 36
+legend.fontsize  : 20
+font.size        : 20
+
+# Ticks
+xtick.direction  : in
+ytick.direction  : in
+xtick.labelsize  : 24
+ytick.labelsize  : 24
+xtick.major.size  : 8
+ytick.major.size  : 8
+xtick.minor.size  : 4
+ytick.minor.size  : 4
+
+# General 
+figure.figsize   : 16, 9
+figure.dpi       : 100
