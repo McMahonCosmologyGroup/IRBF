@@ -1,0 +1,3 @@
+main cell 24:42: RuntimeWarning: invalid value encountered in divide
+main cell 24:42: RuntimeWarning: divide by zero encountered in divide
+Styrofoam_batch1 shell: max lnL 1949.78 after 8.1 min

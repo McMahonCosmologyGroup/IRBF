@@ -1,0 +1,3 @@
+main cell 24:42: RuntimeWarning: invalid value encountered in divide
+main cell 24:42: RuntimeWarning: divide by zero encountered in divide
+LD24_batch1 shell_A: max lnL 2233.03 after 10.6 min

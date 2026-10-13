@@ -1,0 +1,15 @@
+main cell 24:42: RuntimeWarning: invalid value encountered in divide
+main cell 24:42: RuntimeWarning: divide by zero encountered in divide
+C:\Users\alexg\Python Projects\IRBF_claude_sandbox\foam_models.py:168: RuntimeWarning: overflow encountered in exp
+  model = np.exp(-width * alpha_model(f, p, n, code, tab))
+C:\Users\alexg\Python Projects\IRBF_claude_sandbox\foam_models.py:171: RuntimeWarning: overflow encountered in divide
+  return -0.5 * np.sum((t - model)**2 / err**2 + np.log(2 * np.pi * err**2))
+C:\Users\alexg\Python Projects\IRBF_claude_sandbox\foam_models.py:171: RuntimeWarning: overflow encountered in square
+  return -0.5 * np.sum((t - model)**2 / err**2 + np.log(2 * np.pi * err**2))
+C:\Users\alexg\Python Projects\IRBF_claude_sandbox\foam_models.py:171: RuntimeWarning: overflow encountered in square
+  return -0.5 * np.sum((t - model)**2 / err**2 + np.log(2 * np.pi * err**2))
+C:\Users\alexg\Python Projects\IRBF_claude_sandbox\foam_models.py:168: RuntimeWarning: overflow encountered in exp
+  model = np.exp(-width * alpha_model(f, p, n, code, tab))
+C:\Users\alexg\Python Projects\IRBF_claude_sandbox\foam_models.py:168: RuntimeWarning: overflow encountered in exp
+  model = np.exp(-width * alpha_model(f, p, n, code, tab))
+HD80_batch1 rma: max lnL 1214.65 after 3.2 min

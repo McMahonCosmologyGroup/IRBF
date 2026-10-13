@@ -1,0 +1,3 @@
+main cell 24:42: RuntimeWarning: invalid value encountered in divide
+main cell 24:42: RuntimeWarning: divide by zero encountered in divide
+HD80_batch1 fmr_fix_wc: max lnL 1189.62 after 6.3 min

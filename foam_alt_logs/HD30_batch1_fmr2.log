@@ -1,0 +1,7 @@
+main cell 24:42: RuntimeWarning: invalid value encountered in divide
+main cell 24:42: RuntimeWarning: divide by zero encountered in divide
+C:\ProgramData\miniconda3\Lib\site-packages\dynesty\sampling.py:420: UserWarning: The slice sample interval was expanded more than 1000 times
+  warnings.warn('The slice sample interval was expanded more '
+C:\ProgramData\miniconda3\Lib\site-packages\dynesty\sampling.py:685: UserWarning: Enabling doubling strategy of slice sampling from Neal(2003)
+  warnings.warn('Enabling doubling strategy of slice '
+HD30_batch1 fmr2: max lnL 1050.09 after 24.6 min
