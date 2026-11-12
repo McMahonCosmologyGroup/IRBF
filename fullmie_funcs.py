@@ -7,12 +7,15 @@ with x = k d / 2, m = n_p (voids on both sides of the wall), so that Q_sca = (2 
 G = 2 sum_n (2n+1) (A_n^2 + B_n^2), A_n, B_n the bracketed (real) parts. G(x) is tabulated once per polymer index.
 
 Cells: log-normal number distribution of diameters, ln d ~ N(ln d_med, s^2), wall thickness l = c_l d with
-c_l = (1 - f_m^(1/3)) / 2 (paper Eq. 14), number density fixed by f_m = 1 - f_p (Eq. 12). Then
-    alpha_sca = A * 3 f_m / (2 d_32) * (2 c_l)^2 * < G(x) >_area,      d_32 = d_med e^{5 s^2 / 2}
-where <>_area averages over the cross-section-weighted distribution (median d_med e^{2 s^2}). A = 1 is the isolated
-thin-shell prediction; A = (l_eff / l)^2 is equivalent to a free wall thickness.
+c_l = (1 - f_m^(1/3)) / 2 from the density (paper Eq. 14). Then
+    alpha_sca = C * < Q(x) >_area,      Q = (2 c_l)^2 G(x; n_p)
+with C [cm^-1] the cell cross-sections a ray meets per cm (N sigma_geo, as in R+M+a_RM) and <>_area the average over the
+cross-section-weighted distribution (median d_med e^{2 s^2}; trapezoid on z in [-3.5, 3.5 + 4 s], 161 nodes, see
+_lognormal_rule; G continues as x^2 (a + b ln x) above x = 300). The data fix only C (2 c_l)^2: walls thinner than c_l d
+trade against a larger C. Cells that fill the void fraction f_m (Eq. 12) give C_geo = 3 f_m / (2 d_32), d_32 = d_med e^{5 s^2 / 2};
+C / C_geo is the parameter A of the 2026-10-13 fits.
 
-    params = [tan_delta, d_med (um), s, A]
+    params = [tan_delta, d_med (um), s, C (cm^-1)]
 """
 import os
 
@@ -28,13 +31,18 @@ from fitting_funcs import ptform
 c = float(const.c)
 
 LX = np.linspace(np.log(1e-3), np.log(300.0), 4000)      # ln x grid of the G(x) table
-NODES = np.linspace(-3.0, 3.0, 41)                       # log-normal quadrature in units of s
-WTS = np.exp(-0.5 * NODES**2)
-WTS = WTS / WTS.sum()
+# Log-normal quadrature (units of s): trapezoid on z in [-Z_LO, Z_LO + Z_SHIFT s] with N_NODES nodes and the exact
+# Gaussian normalisation. The window is shifted with s because the area-weighted Rayleigh integrand ~ phi(z) e^{4 s z}
+# peaks at z = 4 s; a fixed +-3 sigma window misses up to 60% of <G> for broad distributions. < 0.1% of a dense
+# (+-8 sigma) integral everywhere in the prior (s 0.02-1.5, d_med 3-3162 um, 0.1-2 THz), all four n_p tables.
+Z_LO = 3.5
+Z_SHIFT = 4.0
+N_NODES = 161
+I_ASYM = int(round((np.log(100.0) - LX[0]) / (LX[1] - LX[0])))   # table index at x = 100, for the x > 300 asymptote
 
-PARAM_NAMES = ['tan_delta', 'd_med_um', 's', 'A']
-PRIOR1 = [0, 0.5, 0.02, -2]          # tan_delta U(0, 1e-3); d_med LU(10^0.5, 10^3.5) um; s U(0.02, 1.5); A LU(10^-2, 10^2)
-PRIOR2 = [1e-3, 3.5, 1.5, 2]
+PARAM_NAMES = ['tan_delta', 'd_med_um', 's', 'C_per_cm']
+PRIOR1 = [0, 0.5, 0.001, 0]          # tan_delta U(0, 1e-3); d_med LU(10^0.5, 10^3.5) um; s U(0.001, 1.5); C LU(10^0, 10^5) cm^-1
+PRIOR2 = [1e-3, 3.5, 1.5, 5]         # s widened 2026-10-13 (HD80 sat on the old 0.02 edge); C replaced A 2026-10-27, same 5-decade width
 PRIORTYPE = ['U', 'LU', 'U', 'LU']
 
 
@@ -78,26 +86,43 @@ def _g_interp(x, g):
     fx = (lx - LX[0]) / dl
     if fx < 0.0:                                   # below the grid: Rayleigh x^4 continuation
         return g[0] * np.exp(4.0 * (lx - LX[0]))
-    fx = min(fx, LX.size - 1.000001)
-    i = int(fx)
+    if fx > LX.size - 1:                           # above the grid: G / x^2 = a + b ln x (thin-film asymptote,
+        r1 = g[LX.size - 1] * np.exp(-2.0 * LX[-1])  # two-point fit at x = 100 and 300; <= 0.12% up to x = 3e4)
+        r2 = g[I_ASYM] * np.exp(-2.0 * LX[I_ASYM])
+        b = (r1 - r2) / (LX[-1] - LX[I_ASYM])
+        return np.exp(2.0 * lx) * (r1 + b * (lx - LX[-1]))
+    i = min(int(fx), LX.size - 2)
     t = fx - i
     return g[i] * (1 - t) + g[i + 1] * t
+
+
+@njit(fastmath=True)
+def _lognormal_rule(s):
+    """Nodes z (units of s) and weights for <F>_area = int phi(z) F(x_a e^{s z}) dz."""
+    zlo = -Z_LO
+    dz = (Z_LO + Z_SHIFT * s - zlo) / (N_NODES - 1)
+    z = zlo + dz * np.arange(N_NODES)
+    w = np.exp(-0.5 * z * z) * dz / np.sqrt(2.0 * np.pi)
+    w[0] *= 0.5
+    w[-1] *= 0.5
+    return z, w
 
 
 @njit(fastmath=True)
 def MIE_sca_njit(f, params, g, f_m):
     """Scattering attenuation [cm^-1] at f [GHz]."""
     d_med = params[1] * 1e-6
-    s, A = params[2], params[3]
+    s, C = params[2], params[3]
     cl = (1.0 - f_m**(1.0 / 3.0)) / 2.0
-    d32 = d_med * np.exp(2.5 * s * s)
-    pref = A * 1.5 * f_m / d32 * (2.0 * cl)**2 * 1e-2           # m^-1 -> cm^-1
+    pref = C * (2.0 * cl)**2                                     # cm^-1
     xa = np.pi * d_med * np.exp(2.0 * s * s) * 1e9 / c           # area-weighted median x per GHz
+    z, w = _lognormal_rule(s)
+    ez = np.exp(s * z)
     out = np.empty(f.size)
     for i in range(f.size):
         acc = 0.0
-        for j in range(NODES.size):
-            acc += WTS[j] * _g_interp(xa * f[i] * np.exp(s * NODES[j]), g)
+        for j in range(z.size):
+            acc += w[j] * _g_interp(xa * f[i] * ez[j], g)
         out[i] = pref * acc
     return out
 
@@ -195,14 +220,14 @@ def shell_intensity(m, x, theta):
 
 def wedge_fraction(f, d_med_um, s, n_p, th_lo=40.0, th_hi=90.0, ntheta=721):
     """Fraction of the scattered power between th_lo and th_hi [deg] for the log-normal shell population at each
-    frequency in f [GHz] (cross-section-weighted mixture of the single-shell patterns; independent of A and of l)."""
+    frequency in f [GHz] (cross-section-weighted mixture of the single-shell patterns; independent of C and of l)."""
     theta = np.linspace(1e-6, np.pi - 1e-6, ntheta)
     sel = (theta >= np.deg2rad(th_lo)) & (theta <= np.deg2rad(th_hi))
     d_area = d_med_um * 1e-6 * np.exp(2 * s * s)
     out = np.empty(len(f))
     for i, fi in enumerate(np.atleast_1d(f)):
         mix = np.zeros(ntheta)
-        for zj, wj in zip(NODES, WTS):
+        for zj, wj in zip(*_lognormal_rule(s)):
             x = np.pi * d_area * np.exp(s * zj) * fi * 1e9 / c
             # area-weighted nodes: number(d) dsigma/dOmega ~ number(d) d^2 I(theta) = w_area I(theta), since l ~ d
             mix += wj * shell_intensity(n_p, x, theta)
