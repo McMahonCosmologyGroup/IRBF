@@ -1,0 +1,7 @@
+main cell 24:42: RuntimeWarning: invalid value encountered in divide
+main cell 24:42: RuntimeWarning: divide by zero encountered in divide
+C:\Users\alexg\Python Projects\2026\IRBF\foam_mm_crosscheck.py:67: RuntimeWarning: overflow encountered in square
+  return -0.5 * np.sum((t - model)**2 / err**2 + np.log(2 * np.pi * err**2))
+C:\Users\alexg\Python Projects\2026\IRBF\foam_mm_crosscheck.py:67: RuntimeWarning: overflow encountered in divide
+  return -0.5 * np.sum((t - model)**2 / err**2 + np.log(2 * np.pi * err**2))
+saved pkls/Styrofoam_batch1_mm_mm.pkl after 6.2 min

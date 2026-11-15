@@ -1,0 +1,3 @@
+main cell 24:42: RuntimeWarning: invalid value encountered in divide
+main cell 24:42: RuntimeWarning: divide by zero encountered in divide
+saved pkls/HD30_batch2_mm_sep_mm.pkl after 5.4 min
