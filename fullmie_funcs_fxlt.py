@@ -1,5 +1,5 @@
 """Full-Mie thin-shell model with the loss tangent fixed from material properties; fullmie_funcs.py keeps the free-tan_delta
-model. Same pattern as fitting_funcs_fxlt.py for R+M+a_RM: params = [d_med (um), s, C (cm^-1)], with lt passed separately.
+model. Same pattern as fitting_funcs_fxlt.py for R+M+a_RM: params = [K_Mie (GHz), s, C (cm^-1)], with lt passed separately.
 """
 import numpy as np
 import dynesty
@@ -9,7 +9,7 @@ from numba import njit, prange
 from fitting_funcs import ptform
 from fullmie_funcs import MIE_alpha_njit, MIE_sca_njit, PRIOR1 as _PRIOR1, PRIOR2 as _PRIOR2, PRIORTYPE as _PRIORTYPE
 
-PARAM_NAMES = ['d_med_um', 's', 'C_per_cm']
+PARAM_NAMES = ['K_Mie_GHz', 's', 'C_per_cm']
 PRIOR1, PRIOR2, PRIORTYPE = _PRIOR1[1:], _PRIOR2[1:], _PRIORTYPE[1:]
 
 

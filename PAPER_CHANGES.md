@@ -38,14 +38,23 @@ They do not fix d_med, C and s individually: σ(ln d_med) runs from 0.02 to 0.56
 
 **C stays free.** The spectrum needs two independent features, an amplitude and a turnover position. Without C, d_med would have to set both at once.
 
-**Change 1: name and define K_Mie.** Fit (tanδ, K_Mie, s, C) with
+**All three scattering parameters are needed** (checked 2026-11-17):
+- **The size scale** sets the turnover.
+- **s:** a single size (s = 0) is worse by Δχ² = 108–3393 (deflated ΔBIC −10 to −250) in 7 of 16 batches: HD30 b2 and b3, LD15 b1 and b2, LD24 b1 and b2, and HD80. It is a tie in the rest (notebook, single-size section).
+- **C:** fixing C to NG gives χ²/dof 5.6–809 in 9 of 11 batches (`foam_shell.md`, 10/13 data).
 
-    K_Mie ≡ c / (π d_a),   d_a = d_med e^{2s²}  (area-weighted median),   so  x_a = f / K_Mie
+**Change 1: name and define K_Mie (revised 2026-11-17).** Fit (tanδ, K_Mie, s, C) with
 
-- This is the role ρ = f/K_Mie played in the old Eq. 3. The paper uses only this single Mie turnover.
-- It is an exact reparameterization. From (ln d_med, s, ln C) to (ln K_Mie, s, ln C), ln K_Mie = const − ln d_med − 2s², so the Jacobian is 1 and log-uniform priors carry over. Only the edges of the prior box change.
-- Cached posteriors can therefore be transformed rather than refitted, as was done for the C-for-A swap on 2026-10-27, provided the new bounds cover them.
-- **Its values are not comparable to the old Table 1 K_Mie.** The old ρ carried 2(m−1): HD30 K_Mie is now 1.25–1.8 THz, against 490–530 GHz in the draft. Add a footnote.
+    K_Mie ≡ c / (π d_63),   d_63 = (⟨d⁶⟩/⟨d³⟩)^{1/3} = d_med e^{9s²/2}  (Rayleigh-weighted diameter),   so  x_63 = f / K_Mie
+
+- **Why d_63, not the area-weighted median d_a = d_med e^{2s²}** (the 2026-11-16 proposal):
+  - The fitted turnover, where the local slope falls through 3, is fixed to 0.3–2.4% and scales as d_med e^{~4.7s²} in every scattering-dominated batch.
+  - K_Mie built on d_63 is fixed to 0.2–9% (sd ln K). Built on d_a it is fixed only to 3–31% and stays correlated with C (r = +0.90 to +0.99).
+  - d_63 is also the moment in d_R (Change 2), so the turnover size and the amplitude size are the same moment of the distribution.
+- **What remains degenerate.** One loose direction remains, s ↔ C (r = 0.55–0.97): the low-frequency amplitude traded against the sharpness of the turnover. It is intrinsic, because the data fix two combinations of (K_Mie, s, C) tightly and the third loosely. Say so; don't quote s or C alone as microstructure.
+- **The single Mie turnover.** This is the role ρ = f/K_Mie played in the old Eq. 3, and the paper uses only this one turnover. For a single size (s = 0), K_Mie = c/(πd).
+- **It is an exact reparameterization.** ln K_Mie = const − ln d_med − 4.5s², so the Jacobian is 1. The prior is LU(10^1.5, 10^4.5) GHz (d_63 ≈ 3–3000 µm), the same 3-decade width as the old d_med prior, so ln Z is comparable. The model reproduces the d_med one to 1e-14. All fits were rerun natively (2026-11-17).
+- **Its values are not comparable to the old Table 1 K_Mie.** The old ρ carried 2(m−1): HD30 K_Mie is now 0.99–1.11 THz, against 490–530 GHz in the draft. Add a footnote.
 
 **Change 2: replace Eqs. 15–16 with the Rayleigh-limit inversion.** For x ≪ 1 the thin-shell G(x) → G₀x⁴, with
 
@@ -55,7 +64,7 @@ This is Eq. 38; it matches the code's G table to 6 digits (3.26893 for n_p = 1.5
 
 *The fit's Rayleigh asymptote.* K_Ray is derived, not fitted; the form matches Eq. 4.
 
-    α_Ray(f) = C (2ℓ/d)² G₀ e^{8s²} (f/K_Mie)⁴ ≡ C (f/K_Ray)⁴
+    α_Ray(f) = C (2ℓ/d)² G₀ e^{−2s²} (f/K_Mie)⁴ ≡ C (f/K_Ray)⁴      (⟨x⁴⟩_area = x_63⁴ e^{−2s²})
 
 *Physical cells.* N from Eq. 12, σ = πd²/4, ℓ = c_ℓ d from Eq. 14, for any size distribution:
 
@@ -65,29 +74,35 @@ This holds because the polarizability goes as d²ℓ ∝ d³, so N⟨σ_Ray⟩ �
 
 *Equate and solve:*
 
-    d_R = [ 2 C c⁴ / (3 π⁴ f_m (2ℓ/d)² G₀ K_Ray⁴) ]^{1/3} = [ (2C / 3f_m) (c / π K_Mie)⁴ e^{8s²} ]^{1/3}
+    d_R = [ 2 C c⁴ / (3 π⁴ f_m (2ℓ/d)² G₀ K_Ray⁴) ]^{1/3} = [ (2C / 3f_m) d_63⁴ e^{−2s²} ]^{1/3},   d_63 = c / (π K_Mie)
 
 - In the second form, (2ℓ/d)² and G₀ cancel. d_R depends only on the Rayleigh amplitude, which the data fix, so the C–d_med–s ridge drops out. It is constrained to 1–4%, about 10% for LD15 b2.
 - The Eq. 16 analogue keeps the nominal cell size and solves instead for the wall thickness ℓ that reproduces α_Ray.
 - Both models now give two length scales:
-  - **Turnover size,** d_a = c/(πK_Mie), which does not depend on C (the old Eq. 15's role).
+  - **Turnover size,** d_63 = c/(πK_Mie), which does not depend on C (the old Eq. 15's role).
   - **Amplitude size,** d_R, which assumes C = NG and walls from Eq. 14 (the old Eq. 16's role).
 
   They agree only if C = NG.
 
 **Numbers.** From the cached `_g120` full-Mie posteriors on 2026-11-16, script `rayleigh_size.py` (scratchpad, not in the repo).
 
-| batch | K_Mie [GHz] | d_a [µm] | d_R [µm] | nominal [µm] | ℓ for nominal-size cells vs Eq. 14 [µm] |
-|---|---|---|---|---|---|
-| HD30 b1 | 1249 | 76 | 244 ± 3 | 400 | 0.98 vs 2.04 |
-| HD30 b2 | 1816 | 53 | 241 ± 8 | 400 | 0.95 vs 2.04 |
-| HD30 b3 | 1312 | 73 | 186 ± 2 | 400 | 0.65 vs 2.04 |
-| LD24 b1 / b2 | 1683 / 1405 | 57 / 68 | 244 / 192 | 300 | 0.91 / 0.64 vs 1.24 |
-| LD15 b1 / b2 | 6078 / 1695 | 16 / 56 | 375 / 260 (+24/−10) | 380 | 0.93 / 0.54 vs 0.95 |
-| HD80 | 1273 | 75 | 220 | 600 | 1.9 vs 8.5 |
-| HD110 | 458 | 208 | 540 | 1050 | 7.7 vs 21 |
-| PP35 b1 / b2 | 5000 / 1712 | 19 / 56 | 100 / 56 | 50 / 150 | 0.89 / 0.22 vs 0.32 / 0.95 |
-| Styrofoam | 685 | 139 | 241 | – | – |
+K_Mie and d_63 were added 2026-11-17 as exact transforms of the same posteriors. The old area-weighted K_Mie(d_a) is kept for reference.
+
+| batch | K_Mie [GHz] | d_63 [µm] | old K_Mie(d_a) [GHz] | d_a [µm] | d_R [µm] | nominal [µm] | ℓ for nominal-size cells vs Eq. 14 [µm] |
+|---|---|---|---|---|---|---|---|
+| HD30 b1 | 1069 (+30/−27) | 89 | 1249 | 76 | 244 ± 3 | 400 | 0.98 vs 2.04 |
+| HD30 b2 | 987 (+21/−17) | 97 | 1816 | 53 | 241 ± 8 | 400 | 0.95 vs 2.04 |
+| HD30 b3 | 1106 ± 16 | 86 | 1312 | 73 | 186 ± 2 | 400 | 0.65 vs 2.04 |
+| LD24 b1 / b2 | 916 / 1100 | 104 / 87 | 1683 / 1405 | 57 / 68 | 244 / 192 | 300 | 0.91 / 0.64 vs 1.24 |
+| LD15 b1 / b2 | 874 / 1122 | 109 / 85 | 6078 / 1695 | 16 / 56 | 375 / 260 (+24/−10) | 380 | 0.93 / 0.54 vs 0.95 |
+| HD80 | 1037 | 92 | 1273 | 75 | 220 | 600 | 1.9 vs 8.5 |
+| HD110 | 411 | 232 | 458 | 208 | 540 | 1050 | 7.7 vs 21 |
+| PP35 b1 / b2 | 1250 / 1678 | 76 / 57 | 5000 / 1712 | 19 / 56 | 100 / 56 | 50 / 150 | 0.89 / 0.22 vs 0.32 / 0.95 |
+| Styrofoam | 605 | 158 | 685 | 139 | 241 | – | – |
+| L200 | 3504 | 27 | 3669 | 26 | – | – | – |
+| Volara 6A / 4A par / 4A per | 240 / 235 / 311 | 398 / 405 / 307 | same | same | – | – | – |
+
+**The turnover size is now uniform.** With d_63, the PE foams all turn over at K_Mie ≈ 0.9–1.1 THz (d_63 ≈ 85–110 µm), including LD15 b1 and PP35 b1. Under d_a those two scattered to 5–6 THz because of their large s.
 
 - **HD30 b3 agrees with the draft.** The draft's Eqs. 15–16 give d ≈ 200 µm and ℓ ≈ 0.8 µm. The new inversion gives d_R = 186 µm, or ℓ = 0.65 µm for 400 µm cells. The draft's "factor of two from microscopy" conclusion survives the change of model.
 - **The mismatch is stronger than it looks.** d_R is a high moment that favours the largest cells, so it should be at or above the typical microscope diameter. Coming out below nominal makes the discrepancy stronger, not weaker.
@@ -111,10 +126,10 @@ This holds because the polarizability goes as d²ℓ ∝ d³, so N⟨σ_Ray⟩ �
 **Caveats for the text.**
 1. **d_R is not a median.** The number median is D = d_R e^{−4.5s²}, which brings back the degeneracy in s: for HD30 b2, D = 80 µm against d_R = 241 µm. Quote d_R as a "Rayleigh-weighted diameter". For a monodisperse foam D = d_R.
 2. **Density dependence.** d_R scales roughly as f_p^{−2/3} through C and the wall factor, so a ±10% density error gives about ∓7% in d_R. It also absorbs any departure from the Eq. 14 thin walls.
-3. **The two sizes disagree.** d_a and d_R differ by about 3–4× for HD30 and LD24. If both are shown, say plainly that the model is not self-consistent with C = NG, which is the same caveat as the free C.
+3. **The two sizes disagree.** d_63 (turnover) and d_R (amplitude) are the same moment, yet they differ by about 2–3× for HD30 and LD24 (for example HD30 b3: 86 against 186 µm). If both are shown, say plainly that the model is not self-consistent with C = NG, which is the same caveat as the free C. Because the moment is the same, the factor is now purely C/NG: (d_R/d_63)³ = (2C/3f_m) d_63 e^{−2s²}.
 
 **Repo follow-ups:**
-- Reparameterize `fullmie_funcs.py` (and `_fxlt`, `_s0`) to K_Mie.
+- ~~Reparameterize `fullmie_funcs.py` (and `_fxlt`, `_s0`) to K_Mie.~~ Done 2026-11-17 (d_63 definition, full refit). Cell 63's table now carries K_Mie and d_63.
 - Add d_a, K_Ray and d_R to the cell-size table (cell 63) and the summary pkl.
 - Update the markdown in cell 34.
 
