@@ -11,6 +11,9 @@ don't trigger spurious refits.
 Pickles are dicts {'results' or 'value': ..., 'meta': {...}}. 'meta' holds the fingerprint plus
 human-readable provenance (date, TeraToptica commit, smoothing window, samples). Bare legacy
 pickles carry no fingerprint and are always treated as stale.
+
+The pickles are gitignored. pkl_cache.py pulls (or pushes) a snapshot of pkls/*.pkl from the
+`pkls-cache` GitHub release, so a fresh clone can skip refitting.
 """
 import datetime
 import hashlib

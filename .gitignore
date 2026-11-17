@@ -4,6 +4,7 @@ alignment_check_20261001.pdf
 
 # Fit and derived caches (fit_cache.py): fingerprinted and regenerable from data + code, kept out of git for size.
 # The small table files in pkls/ (shell_G, Mie tables, json) stay tracked so the folder exists on a fresh clone.
+# A replaceable snapshot of pkls/*.pkl lives on the `pkls-cache` GitHub release: python pkl_cache.py pull
 pkls/*.pkl
 # archived 10/08 PP35 batch 2 full-Mie fit (not regenerable; main.ipynb comparison section)
 !pkls/PP35_batch2_1008_fullmie_reference_g120.pkl
