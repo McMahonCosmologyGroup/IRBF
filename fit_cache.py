@@ -95,6 +95,20 @@ def save_fit(fpath, results, fp, meta):
         pickle.dump({'results': results, 'meta': {'fingerprint': fp, **meta}}, fh)
 
 
+def slim_fit(results):
+    """The few fields of a dynesty Results used after resampling (~80 MB -> bytes): final ln Z and its error,
+    the maximum ln L and the sample at it. Keeps a full fit out of memory once its pickle is saved."""
+    i = int(np.argmax(results['logl']))
+    return {'nlive': int(results.nlive), 'logz': float(results['logz'][-1]), 'logzerr': float(results['logzerr'][-1]),
+            'logl_max': float(results['logl'][i]), 'p_best': np.array(results.samples[i])}
+
+
+def equal_samples(results, rstate=None):
+    """Equal-weight posterior samples of a dynesty Results (rstate=None: dynesty's unseeded default)."""
+    import dynesty
+    return dynesty.utils.resample_equal(results.samples, np.exp(results['logwt'] - results['logz'][-1]), rstate=rstate)
+
+
 def load_derived(fpath, fp):
     """Cached product (alpha percentiles, components) computed from a fit, or None."""
     obj, why = _load(fpath, fp)
